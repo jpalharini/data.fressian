@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="STDOUT_K8S" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>java_time=%d{yyyy-MM-dd'T'HH:mm:ss.SSS'000000'XXX} level=%level context=%contextName logger=%logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT_K8S"/>
+    </root>
+</configuration>

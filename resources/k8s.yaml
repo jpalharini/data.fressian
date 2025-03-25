@@ -1,0 +1,70 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fressian-test
+spec:
+  completions: 6
+  parallelism: 6
+  completionMode: Indexed
+  template:
+    metadata:
+      labels:
+        app: fressian-test
+    spec:
+      nodeSelector:
+        role: worker
+      restartPolicy: Never
+      containers:
+        - name: fressian-test-clj
+          image: clojure:temurin-21-lein
+          ports:
+            - name: metrics
+              containerPort: 9000
+          volumeMounts:
+            - name: data-fressian
+              mountPath: "/opt/data.fressian"
+            - name: maven
+              mountPath: "/root/.m2"
+          workingDir: "/opt/data.fressian"
+          command: ["bash", "-c"]
+          args:
+            - "bin/lc-stress-tests.sh"
+          resources:
+            limits:
+              cpu: 3000m
+              memory: 10Gi
+      volumes:
+        - name: data-fressian
+          hostPath:
+            path: "/home/k3s/dev/datomic/repos/data.fressian"
+        - name: maven
+          hostPath:
+            path: "/home/k3s/.m2"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fressian-test-http
+  labels:
+    app: fressian-test
+spec:
+  ports:
+    - port: 9000
+  selector:
+    app: fressian-test
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: fressian-test
+spec:
+  endpoints:
+    - interval: 30s
+      targetPort: 9000
+      path: /metrics
+  namespaceSelector:
+    matchNames:
+      - default
+  selector:
+    matchLabels:
+      app: fressian-test
