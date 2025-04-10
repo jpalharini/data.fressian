@@ -47,10 +47,13 @@
         fr-handlers   (when convert-list? custom-read-handlers)]
     (a/info (merge {:event :starting-stress-test} argmap))
     (let [work-chan    (async/chan 1)
-          timeout-chan (async/timeout (* 1000 60 20))]
+          timeout-chan (async/timeout (* 1000 60 20))
+          ; avoid submillisecond measurement
+          struct-count (* 1000 (if (< struct-size 9)
+                                 100 1))]
       (loop [runs      0
              proc-time 0]
-        (let [structs (repeatedly 1000 #(gen-struct-fn struct-size))
+        (let [structs (repeatedly struct-count #(gen-struct-fn struct-size))
               ; put generated structs fressianed into the work channel as a single coll
               _       (async/put! work-chan (into [] (for [st structs] (fressian st))))
               [val port] (async/alts!! [work-chan timeout-chan])]
