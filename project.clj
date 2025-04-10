@@ -24,8 +24,10 @@
                             :jvm-opts     ["-server"
                                            "-Xms8g" "-Xmx8g"
                                            "-XX:+UseZGC"]}
-             :fressian-new {:dependencies [[org.fressian/fressian "0.6.9-SNAPSHOT"]]
-                            :main         simple-stress-test}
+             :fressian-convert {:dependencies [[org.fressian/fressian "0.6.9-IConvertList"]]
+                                :main         simple-stress-test-converter}
+             :fressian-reduce {:dependencies [[org.fressian/fressian "0.6.9-IReduceList"]]
+                               :main         simple-stress-test-reducer}
              :fressian-old {:dependencies [[org.fressian/fressian "0.6.8"]]
                             :main         simple-stress-test}}
 

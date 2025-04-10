@@ -13,16 +13,30 @@ for size in "${struct_sizes[@]}"; do
       ;;
     2|3)
       if (( JOB_COMPLETION_INDEX == 2)); then
-        lein with-profile +bench,+fressian-new run -- "vec" ${size} false
+        lein with-profile +bench,+fressian-convert run -- "vec" ${size} false
       else
-        lein with-profile +bench,+fressian-new run -- "map" ${size} false
+        lein with-profile +bench,+fressian-convert run -- "map" ${size} false
       fi
       ;;
     4|5)
       if (( JOB_COMPLETION_INDEX == 4)); then
-        lein with-profile +bench,+fressian-new run -- "vec" ${size} true
+        lein with-profile +bench,+fressian-convert run -- "vec" ${size} true
       else
-        lein with-profile +bench,+fressian-new run -- "map" ${size} true
+        lein with-profile +bench,+fressian-convert run -- "map" ${size} true
+      fi
+      ;;
+    6|7)
+      if (( JOB_COMPLETION_INDEX == 6)); then
+        lein with-profile +bench,+fressian-reduce run -- "vec" ${size} false
+      else
+        lein with-profile +bench,+fressian-reduce run -- "map" ${size} false
+      fi
+      ;;
+    8|9)
+      if (( JOB_COMPLETION_INDEX == 8)); then
+        lein with-profile +bench,+fressian-reduce run -- "vec" ${size} true
+      else
+        lein with-profile +bench,+fressian-reduce run -- "map" ${size} true
       fi
       ;;
   esac

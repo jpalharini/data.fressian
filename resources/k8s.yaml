@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: fressian-test
 spec:
-  completions: 6
+  completions: 10
   parallelism: 6
   completionMode: Indexed
   template:
