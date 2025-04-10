@@ -36,9 +36,9 @@
     (.readObject fr)))
 
 (defmacro measure-duration [& body]
-  `(let [st# (System/currentTimeMillis)]
+  `(let [st# (System/nanoTime)]
      ~@body
-     (- (System/currentTimeMillis) st#)))
+     (- (System/nanoTime) st#)))
 
 (defn stress-test [{:keys [struct-type struct-size convert-list?] :as argmap}]
   (let [gen-struct-fn (case (str struct-type)
