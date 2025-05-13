@@ -10,7 +10,9 @@
   :profiles {:fressian-dev {:source-paths      ["dev"]
                             :java-source-paths ["../fressian/src"]
                             :dependencies      [#_[org.fressian/fressian "0.6.9-SNAPSHOT"]
+                                                [org.clojure/core.async "1.6.681"]
                                                 [org.clojure/clojure "1.12.0"]
+                                                [ch.qos.logback/logback-classic "1.5.16"]
                                                 [com.clojure-goes-fast/clj-memory-meter "0.3.0"]]
                             :repl-options      {:port 5555}
                             :jvm-opts          ["-Djdk.attach.allowAttachSelf"]}
@@ -38,6 +40,16 @@
                                :aot          [simple-stress-test-reducer]
                                :uberjar-name "fressian-reduce.jar"
                                :main         simple-stress-test-reducer}
+
+             :fressian-reducemap {:dependencies [[org.fressian/fressian "0.6.9-IReduceKV"]]
+                                  :aot          [simple-stress-test-mapreducer]
+                                  :uberjar-name "fressian-reducemap.jar"
+                                  :main         simple-stress-test-mapreducer}
+
+             :fressian-mapreadlist {:dependencies [[org.fressian/fressian "0.6.9-mapReadList"]]
+                                                 :aot          [simple-stress-test-mapreadlist]
+                                                 :uberjar-name "fressian-mapreadlist.jar"
+                                                 :main         simple-stress-test-mapreadlist}
 
              :fressian-old {:dependencies [[org.fressian/fressian "0.6.8"]]
                             :aot          [simple-stress-test-converter]
