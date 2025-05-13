@@ -24,11 +24,23 @@
                             :jvm-opts     ["-server"
                                            "-Xms8g" "-Xmx8g"
                                            "-XX:+UseZGC"]}
-             :fressian-convert {:dependencies [[org.fressian/fressian "0.6.9-IConvertList"]]
-                                :main         simple-stress-test-converter}
-             :fressian-reduce {:dependencies [[org.fressian/fressian "0.6.9-IReduceList"]]
-                               :main         simple-stress-test-reducer}
-             :fressian-old {:dependencies [[org.fressian/fressian "0.6.8"]]
-                            :main         simple-stress-test}}
+             :jar          {:source-paths ^:replace ["dev"]
+                            :dependencies [[org.clojure/clojure "1.12.0"]
+                                           [org.clojure/core.async "1.6.681"]
+                                           [ch.qos.logback/logback-classic "1.5.16"]]}
 
+             :fressian-convert {:dependencies [[org.fressian/fressian "0.6.9-IConvertList"]]
+                                :aot          [simple-stress-test-converter]
+                                :uberjar-name "fressian-convert.jar"
+                                :main         simple-stress-test-converter}
+
+             :fressian-reduce {:dependencies [[org.fressian/fressian "0.6.9-IReduceList"]]
+                               :aot          [simple-stress-test-reducer]
+                               :uberjar-name "fressian-reduce.jar"
+                               :main         simple-stress-test-reducer}
+
+             :fressian-old {:dependencies [[org.fressian/fressian "0.6.8"]]
+                            :aot          [simple-stress-test-converter]
+                            :uberjar-name "fressian-old.jar"
+                            :main         simple-stress-test-converter}}
   :jvm-opts ["-Xmx2g" "-server"])
