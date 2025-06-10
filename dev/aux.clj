@@ -55,8 +55,18 @@
      ~@body
      (- (System/nanoTime) st#)))
 
-(defn stress-test [{:keys [struct-type struct-size convert-list?] :as argmap}
-                   read-handlers]
+(defn stress-test
+  "Benchmarks Fressian reading for 20 minutes, repeatedly reading a collection of structs.
+   Generates a log message at the end with total runs and processing time.
+
+   Receives argmap and a collection of Fressian read handlers
+   - struct-type can be map or vec
+   - struct-size is an arbitrary positive integer - if less than 9, repeated reading will use a collection of 1,000
+     structs, else it will use a collection of 100,000 to avoid sub-millisecond measurement as the JVM doesn't promise
+     sub-millisecond resolution
+   - convert-list? determines whether reading will use custom read handlers or defaults"
+  [{:keys [struct-type struct-size convert-list?] :as argmap}
+   read-handlers]
   (let [gen-struct-fn (case (str struct-type)
                         "map" gen-map
                         "vec" gen-vec)
@@ -64,13 +74,12 @@
     (info (merge {:event :starting-stress-test} argmap))
     (let [work-chan    (async/chan 1)
           timeout-chan (async/timeout (* 1000 60 20))
-          ; avoid submillisecond measurement
           struct-count (* 1000 (if (< struct-size 9)
                                  100 1))]
       (loop [runs      0
              proc-time 0]
         (let [structs (repeatedly struct-count #(gen-struct-fn struct-size))
-              ; put generated structs fressianed into the work channel as a single coll
+              ; put generated structs fressianed into the work channel as a single, eager vector
               _       (async/put! work-chan (into [] (for [st structs] (fressian st))))
               [val port] (async/alts!! [work-chan timeout-chan])]
           (cond
