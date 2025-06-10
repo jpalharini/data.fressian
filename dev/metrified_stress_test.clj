@@ -1,4 +1,4 @@
-(ns stress-test
+(ns metrified-stress-test
   (:require [aux :as a]
             [clojure.core.async :as async]
             [clojure.data.fressian :as fr]
