@@ -1,0 +1,57 @@
+(import '[java.io ByteArrayInputStream ByteArrayOutputStream]
+        '[org.fressian FressianReader FressianWriter])
+
+(set! *warn-on-reflection* true)
+
+(defn uuid-str []
+  (str (random-uuid)))
+
+(defn gen-vec [size]
+  (into [] (repeatedly size uuid-str)))
+
+(defn gen-map [size]
+  (into {} (repeatedly size #(vector (uuid-str) (uuid-str)))))
+
+(defn fressian [data]
+  (with-open [baos (ByteArrayOutputStream.)
+              fw   (FressianWriter. baos)]
+    (.writeObject fw data)
+    (.toByteArray baos)))
+
+(defn defressian [data & [handlers]]
+  (with-open [bais (ByteArrayInputStream. data)
+              fr   (FressianReader. bais handlers)]
+    (.readObject fr)))
+
+(defmacro with-nsec [& body]
+  `(let [st#  (System/nanoTime)
+         ret# ~@body
+         dur# (- (System/nanoTime) st#)]
+     [dur# ret#]))
+
+(defn bench [ctor size batch]
+  (let [data (fressian (ctor size))
+        opts {:ctor (str ctor) :size size :batch batch}]
+    (prn (merge {:event :start} opts))
+    (loop [r  10
+           tt (long 0)]
+      (let [[t _] (with-nsec (dotimes [_ (/ batch size)]
+                               (defressian data)))]
+        (if (> r 0)
+          (recur (dec r) (+ tt t))
+          (let [msec           (/ tt 1e6)
+                batch-ms       (/ msec 10)
+                ; follows Rich's formula in the sheet, but maybe should be (/ (/ batch size) batch-ms))?
+                entries-per-ms (/ batch batch-ms)]
+            (prn (merge {:event :end} opts
+                        {:batch-ms batch-ms :entries-per-ms entries-per-ms}))))))))
+
+(let [sizes [1 2 4 8 16 64 256]]
+  (let [ctor  #'gen-vec
+        batch 4000000]
+    (doseq [size sizes]
+      (bench ctor size batch)))
+  (let [ctor  #'gen-map
+        batch 2000000]
+    (doseq [size sizes]
+      (bench ctor size batch))))
